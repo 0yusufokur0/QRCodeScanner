@@ -11,7 +11,6 @@ import android.util.SparseArray
 import android.view.SurfaceHolder
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.google.android.gms.vision.CameraSource
@@ -19,25 +18,29 @@ import com.google.android.gms.vision.Detector
 import com.google.android.gms.vision.barcode.Barcode
 import com.google.android.gms.vision.barcode.BarcodeDetector
 import com.resurrection.base.core.activity.BaseActivity
+import com.resurrection.base.general.hideSystemUI
 import com.resurrection.qrcodescanner.databinding.ActivityMainBinding
 import com.resurrection.qrcodescanner.databinding.DetectionResultLayoutBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class MainActivity : BaseActivity<ActivityMainBinding, MainActivityViewModel>(R.layout.activity_main,MainActivityViewModel::class.java) {
+class MainActivity : BaseActivity<ActivityMainBinding, MainActivityViewModel>(
+    R.layout.activity_main,
+    MainActivityViewModel::class.java
+) {
 
     private val taskHandler = Handler(Looper.getMainLooper())
     private lateinit var detector: BarcodeDetector
     private lateinit var cameraSource: CameraSource
     private lateinit var builder: AlertDialog.Builder
-    private lateinit var dialogBinding : DetectionResultLayoutBinding
+    private lateinit var dialogBinding: DetectionResultLayoutBinding
     private lateinit var alertDialog: AlertDialog
-
     override fun init(savedInstanceState: Bundle?) {
         setUpDetector()
         setUpCamera()
         setUpSurface()
         setUpAlertDialog()
+        hideSystemUI()
 
     }
 
@@ -54,7 +57,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainActivityViewModel>(R.
 
     }
 
-    private fun setUpDetector(){
+    private fun setUpDetector() {
         detector = BarcodeDetector
             .Builder(this)
             .setBarcodeFormats(Barcode.ALL_FORMATS)
@@ -62,11 +65,12 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainActivityViewModel>(R.
 
         detector.setProcessor(object : Detector.Processor<Barcode> {
             override fun release() {}
-            override fun receiveDetections(p0: Detector.Detections<Barcode>?) = detectionResult(p0?.detectedItems)
+            override fun receiveDetections(p0: Detector.Detections<Barcode>?) =
+                detectionResult(p0?.detectedItems)
         })
     }
 
-    private fun setUpCamera(){
+    private fun setUpCamera() {
         cameraSource = CameraSource
             .Builder(this, detector)
             .setRequestedPreviewSize(1024, 768)
@@ -75,7 +79,7 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainActivityViewModel>(R.
             .build()
     }
 
-    private fun setUpSurface(){
+    private fun setUpSurface() {
         binding.barcodeSurfaceView.holder.addCallback(object : SurfaceHolder.Callback2 {
             override fun surfaceCreated(p0: SurfaceHolder) = checkPermission()
             override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) = Unit
@@ -103,12 +107,20 @@ class MainActivity : BaseActivity<ActivityMainBinding, MainActivityViewModel>(R.
     }
 
     private fun checkPermission() {
-        if (ContextCompat.checkSelfPermission(this, permission.CAMERA) == PackageManager.PERMISSION_GRANTED)
+        if (ContextCompat.checkSelfPermission(
+                this,
+                permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED
+        )
             startCamera()
         else ActivityCompat.requestPermissions(this, arrayOf(permission.CAMERA), 123)
     }
 
-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 123) {
             if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED)
