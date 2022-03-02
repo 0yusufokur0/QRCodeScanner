@@ -54,7 +54,7 @@ android {
 dependencies {
 
     // Base
-    implementation 'com.github.0yusufokur0:AppBase:1.3'
+    implementation 'com.github.0yusufokur0:AppBase:1.3.1'
 
     // DataBinding
     kapt 'com.android.databinding:compiler:3.2.0'
